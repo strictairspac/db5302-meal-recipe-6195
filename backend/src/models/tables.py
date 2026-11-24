@@ -1,5 +1,5 @@
 from sqlalchemy import (JSON, Column, ForeignKey, Integer, MetaData, String,
-                        Table, Text)
+                        Table, Text, UniqueConstraint)
 
 schema = MetaData()
 users = Table('accounts', schema,
@@ -38,3 +38,32 @@ audit = Table('audit_events', schema,
     Column('action', String(32), nullable=False),
     Column('reference', String(50), nullable=False),
     Column('created_at', String(32), nullable=False))
+lots = Table('ingredient_lots', schema,
+    Column('id', Integer, primary_key=True),
+    Column('ingredient', String(32), nullable=False),
+    Column('lot', String(32), nullable=False),
+    Column('status', String(20), nullable=False, index=True),
+    Column('sealed_by', String(40)),
+    Column('sealed_at', String(32)),
+    Column('created_at', String(32), nullable=False),
+    UniqueConstraint('ingredient', 'lot', name='uq_ingredient_lot'))
+productions = Table('production_batches', schema,
+    Column('id', Integer, primary_key=True),
+    Column('batch', String(32), nullable=False, unique=True),
+    Column('kind', String(8), nullable=False),
+    Column('recipe', String(32), nullable=False),
+    Column('name', String(80), nullable=False),
+    Column('unit', String(12), nullable=False),
+    Column('quantity', String(40), nullable=False),
+    Column('status', String(20), nullable=False, index=True),
+    Column('served_by', String(40)),
+    Column('served_at', String(32)),
+    Column('author', String(40), nullable=False),
+    Column('created_at', String(32), nullable=False))
+batch_inputs = Table('batch_inputs', schema,
+    Column('id', Integer, primary_key=True),
+    Column('production_id', ForeignKey('production_batches.id'), nullable=False, index=True),
+    Column('ingredient', String(32)),
+    Column('lot', String(32)),
+    Column('semi_batch', String(32)),
+    Column('quantity', String(40), nullable=False))
